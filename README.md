@@ -10,6 +10,5 @@ Created by : @AraafRoyall
 
 Telegram Username : @AraafRoyall 
 
-Thanks for using the Module ..
-
+The module is only for personal testing purpose
 Feel free to contact, ask, help, discuss about the module
