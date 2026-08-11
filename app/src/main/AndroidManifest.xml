@@ -21,7 +21,8 @@
 		</activity>
 		<activity
 			android:name=".DebugActivity"
-			android:screenOrientation="portrait" />
+			android:screenOrientation="portrait" />
+
 <meta-data
     android:name="xposedmodule"
     android:value="true" />
@@ -33,6 +34,6 @@
     android:value="82" />
 <meta-data
     android:name="xposedscope"
-    android:value="org.telegram.messenger" />
+    android:value="org.telegram.messenger,top.qwq2333.nullgram" />
 	</application>
-</manifest>
+</manifest>

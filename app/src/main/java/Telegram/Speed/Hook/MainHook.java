@@ -22,7 +22,8 @@ public class MainHook implements IXposedHookLoadPackage {
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
 
-        if ("org.telegram.messenger".equals(loadPackageParam.packageName)) {
+        if ("org.telegram.messenger".equals(loadPackageParam.packageName)
+                || "top.qwq2333.nullgram".equals(loadPackageParam.packageName)) {
             try {
                 XposedHelpers.findAndHookMethod("org.telegram.messenger.FileLoadOperation", loadPackageParam.classLoader, "updateParams", new XC_MethodHook() {
                     @Override
@@ -34,9 +35,9 @@ public class MainHook implements IXposedHookLoadPackage {
 
                         var maxCdnParts = (int) (DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);
                         XposedHelpers.setIntField(param.thisObject, "downloadChunkSizeBig", downloadChunkSizeBig);
-                        XposedHelpers.setObjectField(param.thisObject, "maxDownloadRequests", maxDownloadRequests);
-                        XposedHelpers.setObjectField(param.thisObject, "maxDownloadRequestsBig", maxDownloadRequestsBig);
-                        XposedHelpers.setObjectField(param.thisObject, "maxCdnParts", maxCdnParts);
+                        XposedHelpers.setIntField(param.thisObject, "maxDownloadRequests", maxDownloadRequests);
+                        XposedHelpers.setIntField(param.thisObject, "maxDownloadRequestsBig", maxDownloadRequestsBig);
+                        XposedHelpers.setIntField(param.thisObject, "maxCdnParts", maxCdnParts);
 
                         try {
                             var fileSize = XposedHelpers.getLongField(param.thisObject, "totalBytesCount");
