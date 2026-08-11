@@ -29,11 +29,10 @@ public class MainHook implements IXposedHookLoadPackage {
     );
 
     private static final int DOWNLOAD_CHUNK_SIZE_BIG = 1024 * 1024; // 1 MiB
-    private static final int MAX_DOWNLOAD_REQUESTS = 12;
     private static final int MAX_DOWNLOAD_REQUESTS_BIG = 12;
 
+    private static final int BIG_FILE_SIZE_FROM = 5 * 1024 * 1024;
     private static final long DEFAULT_MAX_FILE_SIZE = 1024L * 1024L * 2000L;
-    private static final long MIN_TOAST_FILE_SIZE = 5L * 1024L * 1024L;
     private static final long TOAST_THROTTLE_MS = 2L * 60L * 1000L;
 
     private static long speedUpShownAtMs = 0L;
@@ -54,8 +53,9 @@ public class MainHook implements IXposedHookLoadPackage {
                     new XC_MethodHook() {
                         @Override
                         protected void afterHookedMethod(MethodHookParam param) {
-                            applySpeedParams(param);
-                            maybeShowActivationToast(param);
+                            if (applySpeedParams(param)) {
+                                maybeShowActivationToast(param);
+                            }
                         }
                     }
             );
@@ -67,26 +67,83 @@ public class MainHook implements IXposedHookLoadPackage {
         }
     }
 
-    private static void applySpeedParams(XC_MethodHook.MethodHookParam param) {
+    private static boolean applySpeedParams(XC_MethodHook.MethodHookParam param) {
         try {
-            int maxCdnParts = (int) (DEFAULT_MAX_FILE_SIZE / DOWNLOAD_CHUNK_SIZE_BIG);
+            Object operation = param.thisObject;
 
-            XposedHelpers.setIntField(param.thisObject, "downloadChunkSizeBig", DOWNLOAD_CHUNK_SIZE_BIG);
-            XposedHelpers.setIntField(param.thisObject, "maxDownloadRequests", MAX_DOWNLOAD_REQUESTS);
-            XposedHelpers.setIntField(param.thisObject, "maxDownloadRequestsBig", MAX_DOWNLOAD_REQUESTS_BIG);
-            XposedHelpers.setIntField(param.thisObject, "maxCdnParts", maxCdnParts);
+            if (shouldSkipOperation(operation)) {
+                return false;
+            }
+
+            int maxCdnParts = Math.max(1, (int) (DEFAULT_MAX_FILE_SIZE / DOWNLOAD_CHUNK_SIZE_BIG));
+
+            boolean changed = false;
+            changed |= safeSetIntField(operation, "bigFileSizeFrom", BIG_FILE_SIZE_FROM);
+            changed |= safeSetIntField(operation, "downloadChunkSizeBig", DOWNLOAD_CHUNK_SIZE_BIG);
+            changed |= safeSetIntField(operation, "maxDownloadRequestsBig", MAX_DOWNLOAD_REQUESTS_BIG);
+            changed |= safeSetIntField(operation, "maxCdnParts", maxCdnParts);
+
+            if (changed) {
+                XposedBridge.log(TAG + ": speed params applied"
+                        + " size=" + safeGetLongField(operation, "totalBytesCount", 0L)
+                        + " chunkBig=" + DOWNLOAD_CHUNK_SIZE_BIG
+                        + " requestsBig=" + MAX_DOWNLOAD_REQUESTS_BIG
+                        + " maxCdnParts=" + maxCdnParts);
+            }
+
+            return changed;
         } catch (Throwable t) {
             XposedBridge.log(TAG + ": failed to apply speed params");
             XposedBridge.log(t);
+            return false;
+        }
+    }
+
+    private static boolean shouldSkipOperation(Object operation) {
+        long size = safeGetLongField(operation, "totalBytesCount", 0L);
+
+        if (size > 0 && size < BIG_FILE_SIZE_FROM) {
+            return true;
+        }
+
+        return safeGetBooleanField(operation, "forceSmallChunk", false)
+                || safeGetBooleanField(operation, "isPreloadVideoOperation", false)
+                || safeGetBooleanField(operation, "isStream", false);
+    }
+
+    private static boolean safeSetIntField(Object object, String fieldName, int value) {
+        try {
+            XposedHelpers.setIntField(object, fieldName, value);
+            return true;
+        } catch (Throwable t) {
+            XposedBridge.log(TAG + ": could not set " + fieldName);
+            XposedBridge.log(t);
+            return false;
+        }
+    }
+
+    private static long safeGetLongField(Object object, String fieldName, long fallback) {
+        try {
+            return XposedHelpers.getLongField(object, fieldName);
+        } catch (Throwable ignored) {
+            return fallback;
+        }
+    }
+
+    private static boolean safeGetBooleanField(Object object, String fieldName, boolean fallback) {
+        try {
+            return XposedHelpers.getBooleanField(object, fieldName);
+        } catch (Throwable ignored) {
+            return fallback;
         }
     }
 
     private static void maybeShowActivationToast(XC_MethodHook.MethodHookParam param) {
         try {
-            long fileSize = XposedHelpers.getLongField(param.thisObject, "totalBytesCount");
+            long fileSize = safeGetLongField(param.thisObject, "totalBytesCount", 0L);
             long now = System.currentTimeMillis();
 
-            if (fileSize <= MIN_TOAST_FILE_SIZE || now - speedUpShownAtMs <= TOAST_THROTTLE_MS) {
+            if (fileSize <= BIG_FILE_SIZE_FROM || now - speedUpShownAtMs <= TOAST_THROTTLE_MS) {
                 return;
             }
 
