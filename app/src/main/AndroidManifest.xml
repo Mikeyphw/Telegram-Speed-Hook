@@ -34,6 +34,6 @@
     android:value="82" />
 <meta-data
     android:name="xposedscope"
-    android:value="org.telegram.messenger,top.qwq2333.nullgram" />
+    android:value="org.telegram.messenger;top.qwq2333.nullgram" />
 	</application>
 </manifest>
