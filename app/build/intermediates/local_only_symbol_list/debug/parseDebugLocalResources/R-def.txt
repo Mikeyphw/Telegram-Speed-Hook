@@ -1,0 +1,24 @@
+R_DEF: Internal format may change without notice
+local
+color colorAccent
+color colorControlHighlight
+color colorControlNormal
+color colorPrimary
+color colorPrimaryDark
+drawable app_icon
+drawable check
+drawable clroyall
+drawable default_image
+drawable dev
+drawable download
+drawable error
+drawable github
+drawable info
+drawable tele
+drawable telegram
+layout main
+string app_name
+style AppTheme
+style FullScreen
+style NoActionBar
+style NoStatusBar

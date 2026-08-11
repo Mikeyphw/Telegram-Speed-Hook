@@ -1,0 +1,50 @@
+[
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_app_icon.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/app_icon.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_clroyall.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/clroyall.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_check.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/check.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_dev.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/dev.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_download.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/download.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_telegram.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/telegram.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_default_image.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/default_image.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/layout_main.xml.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/layout/main.xml"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_error.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/error.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_info.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/info.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_github.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/github.png"
+    },
+    {
+        "merged": "Telegram.Speed.Hook.app-debug-4:/drawable-xhdpi_tele.png.flat",
+        "source": "Telegram.Speed.Hook.app-main-6:/drawable-xhdpi/tele.png"
+    }
+]

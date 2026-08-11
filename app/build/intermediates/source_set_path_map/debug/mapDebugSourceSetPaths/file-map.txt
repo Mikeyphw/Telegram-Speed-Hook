@@ -1,0 +1,8 @@
+Telegram.Speed.Hook.app-pngs-0 /home/mike/Code/Telegram-Speed-Hook/app/build/generated/res/pngs/debug
+Telegram.Speed.Hook.app-resValues-1 /home/mike/Code/Telegram-Speed-Hook/app/build/generated/res/resValues/debug
+Telegram.Speed.Hook.app-updated_navigation_xml-2 /home/mike/Code/Telegram-Speed-Hook/app/build/generated/updated_navigation_xml/debug
+Telegram.Speed.Hook.app-packageDebugResources-3 /home/mike/Code/Telegram-Speed-Hook/app/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+Telegram.Speed.Hook.app-packageDebugResources-4 /home/mike/Code/Telegram-Speed-Hook/app/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+Telegram.Speed.Hook.app-debug-5 /home/mike/Code/Telegram-Speed-Hook/app/build/intermediates/merged_res/debug/mergeDebugResources
+Telegram.Speed.Hook.app-debug-6 /home/mike/Code/Telegram-Speed-Hook/app/src/debug/res
+Telegram.Speed.Hook.app-main-7 /home/mike/Code/Telegram-Speed-Hook/app/src/main/res

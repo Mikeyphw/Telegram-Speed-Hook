@@ -1,0 +1,75 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="Telegram.Speed.Hook"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="34" />
+10
+11    <application
+11-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:4:2-34:16
+12        android:allowBackup="true"
+12-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:5:3-29
+13        android:debuggable="true"
+14        android:extractNativeLibs="true"
+15        android:icon="@drawable/app_icon"
+15-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:6:3-36
+16        android:label="@string/app_name"
+16-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:7:3-35
+17        android:theme="@style/AppTheme" >
+17-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:8:3-34
+18        <activity
+18-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:9:3-20:14
+19            android:name="Telegram.Speed.Hook.MainActivity"
+19-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:10:4-32
+20            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+20-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:11:4-97
+21            android:exported="true"
+21-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:15:4-27
+22            android:hardwareAccelerated="true"
+22-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:12:4-38
+23            android:screenOrientation="portrait"
+23-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:14:4-40
+24            android:supportsPictureInPicture="true" >
+24-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:13:4-43
+25            <intent-filter>
+25-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:16:4-19:20
+26                <action android:name="android.intent.action.MAIN" />
+26-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:17:5-57
+26-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:17:13-54
+27
+28                <category android:name="android.intent.category.LAUNCHER" />
+28-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:18:5-65
+28-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:18:15-62
+29            </intent-filter>
+30        </activity>
+31
+32        <meta-data
+32-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:22:1-24:28
+33            android:name="xposedmodule"
+33-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:23:5-32
+34            android:value="true" />
+34-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:24:5-25
+35        <meta-data
+35-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:25:1-27:67
+36            android:name="xposeddescription"
+36-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:26:5-37
+37            android:value="Increase Telegram Download Speed to Extreme" />
+37-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:27:5-64
+38        <meta-data
+38-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:28:1-30:26
+39            android:name="xposedminversion"
+39-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:29:5-36
+40            android:value="82" />
+40-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:30:5-23
+41        <meta-data
+41-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:31:1-33:67
+42            android:name="xposedscope"
+42-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:32:5-31
+43            android:value="org.telegram.messenger;top.qwq2333.nullgram" />
+43-->/home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:33:5-64
+44    </application>
+45
+46</manifest>

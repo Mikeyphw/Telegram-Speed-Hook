@@ -1,0 +1,83 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:1-35:12
+INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:1-35:12
+INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:1-35:12
+INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:1-35:12
+	package
+		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:3:2-60
+application
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:4:2-34:16
+INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:4:2-34:16
+	android:extractNativeLibs
+		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+	android:label
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:7:3-35
+	android:icon
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:6:3-36
+	android:allowBackup
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:5:3-29
+	android:theme
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:8:3-34
+activity#Telegram.Speed.Hook.MainActivity
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:9:3-20:14
+	android:screenOrientation
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:14:4-40
+	android:hardwareAccelerated
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:12:4-38
+	android:exported
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:15:4-27
+	android:supportsPictureInPicture
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:13:4-43
+	android:configChanges
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:11:4-97
+	android:name
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:10:4-32
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:16:4-19:20
+action#android.intent.action.MAIN
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:17:5-57
+	android:name
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:17:13-54
+category#android.intent.category.LAUNCHER
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:18:5-65
+	android:name
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:18:15-62
+meta-data#xposedmodule
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:22:1-24:28
+	android:value
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:24:5-25
+	android:name
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:23:5-32
+meta-data#xposeddescription
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:25:1-27:67
+	android:value
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:27:5-64
+	android:name
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:26:5-37
+meta-data#xposedminversion
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:28:1-30:26
+	android:value
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:30:5-23
+	android:name
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:29:5-36
+meta-data#xposedscope
+ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:31:1-33:67
+	android:value
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:33:5-64
+	android:name
+		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:32:5-31
+uses-sdk
+INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
