@@ -1,11 +1,6 @@
 pluginManagement {
     repositories {
         google()
-
-        // Alternate Maven Central endpoint. Useful on Termux when
-        // repo.maven.apache.org is temporarily unreachable/stalling.
-        maven { url = uri("https://repo1.maven.org/maven2/") }
-
         mavenCentral()
         gradlePluginPortal()
     }
@@ -16,10 +11,6 @@ dependencyResolutionManagement {
     repositories {
         maven { url = uri("https://api.xposed.info/") }
         google()
-
-        // Alternate Maven Central endpoint before the canonical one.
-        maven { url = uri("https://repo1.maven.org/maven2/") }
-
         mavenCentral()
     }
 }

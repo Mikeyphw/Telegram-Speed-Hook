@@ -1,0 +1,8 @@
+#!/data/data/com.termux/files/usr/bin/sh
+set -eu
+
+if [ -x "./gradlew" ]; then
+    exec ./gradlew --no-daemon "$@"
+fi
+
+exec gradle --no-daemon "$@"

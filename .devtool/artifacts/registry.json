@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "id": "93e7e758b079",
+      "name": "app-debug.apk",
+      "path": "app/build/outputs/apk/debug/app-debug.apk",
+      "type": "apk",
+      "size": 82906,
+      "sha256": "c84f0cfb64115343fbeab0e85da2208f72e8743be2dd58f8c164a95a93cae541",
+      "commit": "14d3f284c406bc1765d0a3cd7919c119a0b49513",
+      "created_at": "2026-08-25T23:47:11.937533Z",
+      "registered_at": "2026-08-25T23:47:11.937572Z",
+      "valid": true,
+      "metadata": {
+        "path": "app/build/outputs/apk/debug/app-debug.apk",
+        "type": "apk",
+        "variant": "debug",
+        "module": "app",
+        "size": 82906,
+        "sha256": "c84f0cfb64115343fbeab0e85da2208f72e8743be2dd58f8c164a95a93cae541",
+        "valid": true,
+        "package_id": "Telegram.Speed.Hook",
+        "version_code": "1",
+        "version_name": "1.0",
+        "min_sdk": "",
+        "target_sdk": "34",
+        "launchable_activity": "Telegram.Speed.Hook.MainActivity",
+        "signed": null,
+        "abis": [],
+        "checks": [
+          {
+            "name": "exists",
+            "status": "passed",
+            "detail": ""
+          },
+          {
+            "name": "non_empty",
+            "status": "passed",
+            "detail": ""
+          },
+          {
+            "name": "zip_integrity",
+            "status": "passed",
+            "detail": ""
+          },
+          {
+            "name": "member:AndroidManifest.xml",
+            "status": "passed",
+            "detail": "present"
+          },
+          {
+            "name": "aapt2_badging",
+            "status": "passed",
+            "detail": ""
+          },
+          {
+            "name": "signature",
+            "status": "skipped",
+            "detail": "apksigner not found; JAR signature entries present"
+          }
+        ]
+      }
+    }
+  ],
+  "updated_at": "2026-08-25T23:47:11.939376Z"
+}

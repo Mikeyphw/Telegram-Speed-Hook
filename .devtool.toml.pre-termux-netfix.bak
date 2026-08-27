@@ -62,18 +62,18 @@ echo "Source checks passed."
 
 [tasks.clean]
 description = "Clean Gradle outputs"
-command = "./gradle-termux clean"
+command = "./gradlew clean"
 
 [tasks.build_debug]
 description = "Build debug APK"
-command = "./gradle-termux :app:assembleDebug"
+command = "./gradlew :app:assembleDebug"
 
 [tasks.verify]
 description = "Run source checks and build"
 command = """
 set -eu
 devtool run checks.source
-./gradle-termux :app:assembleDebug
+./gradlew :app:assembleDebug
 """
 
 [tasks.install_debug]
@@ -96,7 +96,7 @@ description = "Full local release sanity check"
 command = """
 set -eu
 devtool run checks.source
-./gradle-termux clean :app:assembleDebug
+./gradlew clean :app:assembleDebug
 ls -lh app/build/outputs/apk/debug/app-debug.apk
 """
 
@@ -107,7 +107,7 @@ manifest = "app/src/main/AndroidManifest.xml"
 
 
 [commands]
-build = "./gradle-termux :app:assembleDebug"
-check = "grep -q 'top.qwq2333.nullgram' app/src/main/java/Telegram/Speed/Hook/MainHook.java && ./gradle-termux :app:assembleDebug"
+build = "./gradlew :app:assembleDebug"
+check = "grep -q 'top.qwq2333.nullgram' app/src/main/java/Telegram/Speed/Hook/MainHook.java && ./gradlew :app:assembleDebug"
 install = "adb install -r app/build/outputs/apk/debug/app-debug.apk"
 logs = "adb logcat -v time | grep TgSpeedHook"
