@@ -4,12 +4,22 @@ plugins {
 
 android {
     namespace "Telegram.Speed.Hook"
-    compileSdk 34
+
+    // Keep Telegram-Speed-Hook at least at the chrootctl Android baseline.
+    compileSdk 36
+    buildToolsVersion "36.0.0"
+
+    // NDK is intentionally pinned to major 29 as requested. The project does
+    // not currently build native code, but this prevents future/native tasks
+    // from silently selecting an older side-by-side NDK.
+    ndkVersion "29.0.14206865"
 
     defaultConfig {
         applicationId "Telegram.Speed.Hook"
+        // minSdk is an app-compatibility floor, not a build-tool version.
+        // Preserve the module's existing Android 5.0+ compatibility.
         minSdk 21
-        targetSdk 34
+        targetSdk 36
         versionCode 1
         versionName "1.0"
     }
@@ -23,6 +33,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 }
 

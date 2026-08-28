@@ -8,9 +8,9 @@
       "type": "apk",
       "size": 82906,
       "sha256": "c84f0cfb64115343fbeab0e85da2208f72e8743be2dd58f8c164a95a93cae541",
-      "commit": "14d3f284c406bc1765d0a3cd7919c119a0b49513",
+      "commit": "d1ab274fa3c598474c5f87975c523f4bb5621284",
       "created_at": "2026-08-25T23:47:11.937533Z",
-      "registered_at": "2026-08-25T23:47:11.937572Z",
+      "registered_at": "2026-08-27T23:39:51.257438Z",
       "valid": true,
       "metadata": {
         "path": "app/build/outputs/apk/debug/app-debug.apk",
@@ -63,5 +63,5 @@
       }
     }
   ],
-  "updated_at": "2026-08-25T23:47:11.939376Z"
+  "updated_at": "2026-08-27T23:39:51.259327Z"
 }

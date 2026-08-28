@@ -4,11 +4,21 @@ pluginManagement {
 
         // Alternate Maven Central endpoint. Useful on Termux when
         // repo.maven.apache.org is temporarily unreachable/stalling.
-        maven { url = uri("https://repo1.maven.org/maven2/") }
+        mavenCentral()
 
         mavenCentral()
         gradlePluginPortal()
     }
+}
+
+// Toolchain policy: chrootctl is the minimum baseline, not an exact ceiling.
+import org.gradle.util.GradleVersion
+
+if (GradleVersion.current() < GradleVersion.version("9.7")) {
+    throw new GradleException("Telegram-Speed-Hook requires Gradle 9.7 or newer")
+}
+if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
+    throw new GradleException("Telegram-Speed-Hook requires Java 21 or newer")
 }
 
 dependencyResolutionManagement {
@@ -18,7 +28,7 @@ dependencyResolutionManagement {
         google()
 
         // Alternate Maven Central endpoint before the canonical one.
-        maven { url = uri("https://repo1.maven.org/maven2/") }
+        mavenCentral()
 
         mavenCentral()
     }

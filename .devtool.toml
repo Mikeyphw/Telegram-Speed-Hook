@@ -8,9 +8,9 @@ module = "app"
 [android]
 application_id = "Telegram.Speed.Hook"
 namespace = "Telegram.Speed.Hook"
-compile_sdk = 34
+compile_sdk = 36
 min_sdk = 21
-target_sdk = 34
+target_sdk = 36
 debug_apk = "app/build/outputs/apk/debug/app-debug.apk"
 
 [xposed]
@@ -57,7 +57,10 @@ fi
 grep -q 'org.telegram.messenger;top.qwq2333.nullgram' "$MANIFEST"
 grep -q "compileOnly 'de.robv.android.xposed:api:82'" "$GRADLE"
 
-echo "Source checks passed."
+# Toolchain floor: chrootctl versions are minimums; NDK must stay on major 29.
+python3 scripts/verify-toolchain.py
+
+echo "Source and toolchain checks passed."
 """
 
 [tasks.clean]

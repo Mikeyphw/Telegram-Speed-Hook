@@ -1,7 +1,8 @@
 plugins {
-    id 'com.android.application' version '8.13.0' apply false
+    // Fleet baseline: do not downgrade below the chrootctl Android toolchain.
+    id 'com.android.application' version '9.3.1' apply false
 }
 
 tasks.register('clean', Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }
