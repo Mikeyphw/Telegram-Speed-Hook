@@ -1,3 +1,4 @@
 <resources>
-	<string name="app_name" translatable="false">Telegram Speed Hook</string>
+    <string name="app_name" translatable="false">Telegram Speed Hook</string>
+    <string name="app_description" translatable="false">Modern libxposed module that tunes Telegram and Nullgram large-file download concurrency.</string>
 </resources>

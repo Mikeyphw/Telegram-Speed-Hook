@@ -1,17 +1,12 @@
 pluginManagement {
     repositories {
         google()
-
-        // Alternate Maven Central endpoint. Useful on Termux when
-        // repo.maven.apache.org is temporarily unreachable/stalling.
-        mavenCentral()
-
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
-// Toolchain policy: chrootctl is the minimum baseline, not an exact ceiling.
+// Toolchain policy: these are minimum baselines, not exact ceilings.
 import org.gradle.util.GradleVersion
 
 if (GradleVersion.current() < GradleVersion.version("9.7")) {
@@ -24,12 +19,7 @@ if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        maven { url = uri("https://api.xposed.info/") }
         google()
-
-        // Alternate Maven Central endpoint before the canonical one.
-        mavenCentral()
-
         mavenCentral()
     }
 }

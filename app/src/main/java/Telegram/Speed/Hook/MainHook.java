@@ -1,26 +1,34 @@
 package Telegram.Speed.Hook;
 
-import android.app.AndroidAppHelper;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import io.github.libxposed.api.XposedInterface.ExceptionMode;
+import io.github.libxposed.api.XposedModule;
+import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam;
+import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam;
 
-public class MainHook implements IXposedHookLoadPackage {
+/**
+ * Modern libxposed entry point for Telegram Speed Hook.
+ *
+ * <p>The module intentionally performs the same post-updateParams tuning as the
+ * legacy implementation, but uses API 102's interceptor-chain hook model and
+ * ordinary Java reflection instead of XposedHelpers/XC_MethodHook.</p>
+ */
+public final class MainHook extends XposedModule {
     private static final String TAG = "TgSpeedHook";
 
     private static final String TELEGRAM_PACKAGE = "org.telegram.messenger";
     private static final String NULLGRAM_PACKAGE = "top.qwq2333.nullgram";
-
     private static final String FILE_LOAD_OPERATION_CLASS =
             "org.telegram.messenger.FileLoadOperation";
 
@@ -30,52 +38,69 @@ public class MainHook implements IXposedHookLoadPackage {
 
     private static final int DOWNLOAD_CHUNK_SIZE_BIG = 1024 * 1024; // 1 MiB
     private static final int MAX_DOWNLOAD_REQUESTS_BIG = 12;
-
     private static final int BIG_FILE_SIZE_FROM = 5 * 1024 * 1024;
     private static final long DEFAULT_MAX_FILE_SIZE = 1024L * 1024L * 2000L;
     private static final long TOAST_THROTTLE_MS = 2L * 60L * 1000L;
 
-    private static long speedUpShownAtMs = 0L;
+    private static volatile long speedUpShownAtMs;
 
     @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
-        if (!SUPPORTED_PACKAGES.contains(lpparam.packageName)) {
+    public void onModuleLoaded(ModuleLoadedParam param) {
+        log(Log.INFO, TAG,
+                "module loaded in process=" + param.getProcessName()
+                        + " framework=" + getFrameworkName()
+                        + " " + getFrameworkVersion()
+                        + " api=" + getApiVersion());
+    }
+
+    @Override
+    public void onPackageReady(PackageReadyParam param) {
+        String packageName = param.getPackageName();
+        if (!param.isFirstPackage() || !SUPPORTED_PACKAGES.contains(packageName)) {
             return;
         }
 
-        XposedBridge.log(TAG + ": loading for " + lpparam.packageName);
+        log(Log.INFO, TAG, "preparing hook for " + packageName);
 
         try {
-            XposedHelpers.findAndHookMethod(
+            Class<?> operationClass = Class.forName(
                     FILE_LOAD_OPERATION_CLASS,
-                    lpparam.classLoader,
-                    "updateParams",
-                    new XC_MethodHook() {
-                        @Override
-                        protected void afterHookedMethod(MethodHookParam param) {
-                            if (applySpeedParams(param)) {
-                                maybeShowActivationToast(param);
-                            }
-                        }
-                    }
+                    false,
+                    param.getClassLoader()
             );
+            Method updateParams = operationClass.getDeclaredMethod("updateParams");
+            updateParams.setAccessible(true);
 
-            XposedBridge.log(TAG + ": hooked " + FILE_LOAD_OPERATION_CLASS + "#updateParams");
+            hook(updateParams)
+                    .setExceptionMode(ExceptionMode.PROTECTIVE)
+                    .intercept(chain -> {
+                        // Preserve legacy afterHookedMethod semantics: Telegram runs first.
+                        Object result = chain.proceed();
+                        Object operation = chain.getThisObject();
+                        if (operation != null && applySpeedParams(operation)) {
+                            maybeShowActivationToast(operation);
+                        }
+                        return result;
+                    });
+
+            log(Log.INFO, TAG,
+                    "hooked " + FILE_LOAD_OPERATION_CLASS + "#updateParams via libxposed API 102");
         } catch (Throwable t) {
-            XposedBridge.log(TAG + ": failed to hook " + FILE_LOAD_OPERATION_CLASS + "#updateParams");
-            XposedBridge.log(t);
+            log(Log.ERROR, TAG,
+                    "failed to hook " + FILE_LOAD_OPERATION_CLASS + "#updateParams", t);
         }
     }
 
-    private static boolean applySpeedParams(XC_MethodHook.MethodHookParam param) {
+    private boolean applySpeedParams(Object operation) {
         try {
-            Object operation = param.thisObject;
-
             if (shouldSkipOperation(operation)) {
                 return false;
             }
 
-            int maxCdnParts = Math.max(1, (int) (DEFAULT_MAX_FILE_SIZE / DOWNLOAD_CHUNK_SIZE_BIG));
+            int maxCdnParts = Math.max(
+                    1,
+                    (int) (DEFAULT_MAX_FILE_SIZE / DOWNLOAD_CHUNK_SIZE_BIG)
+            );
 
             boolean changed = false;
             changed |= safeSetIntField(operation, "bigFileSizeFrom", BIG_FILE_SIZE_FROM);
@@ -84,24 +109,22 @@ public class MainHook implements IXposedHookLoadPackage {
             changed |= safeSetIntField(operation, "maxCdnParts", maxCdnParts);
 
             if (changed) {
-                XposedBridge.log(TAG + ": speed params applied"
-                        + " size=" + safeGetLongField(operation, "totalBytesCount", 0L)
-                        + " chunkBig=" + DOWNLOAD_CHUNK_SIZE_BIG
-                        + " requestsBig=" + MAX_DOWNLOAD_REQUESTS_BIG
-                        + " maxCdnParts=" + maxCdnParts);
+                log(Log.INFO, TAG,
+                        "speed params applied"
+                                + " size=" + safeGetLongField(operation, "totalBytesCount", 0L)
+                                + " chunkBig=" + DOWNLOAD_CHUNK_SIZE_BIG
+                                + " requestsBig=" + MAX_DOWNLOAD_REQUESTS_BIG
+                                + " maxCdnParts=" + maxCdnParts);
             }
-
             return changed;
         } catch (Throwable t) {
-            XposedBridge.log(TAG + ": failed to apply speed params");
-            XposedBridge.log(t);
+            log(Log.ERROR, TAG, "failed to apply speed params", t);
             return false;
         }
     }
 
-    private static boolean shouldSkipOperation(Object operation) {
+    private boolean shouldSkipOperation(Object operation) {
         long size = safeGetLongField(operation, "totalBytesCount", 0L);
-
         if (size > 0 && size < BIG_FILE_SIZE_FROM) {
             return true;
         }
@@ -111,59 +134,94 @@ public class MainHook implements IXposedHookLoadPackage {
                 || safeGetBooleanField(operation, "isStream", false);
     }
 
-    private static boolean safeSetIntField(Object object, String fieldName, int value) {
+    private boolean safeSetIntField(Object object, String fieldName, int value) {
         try {
-            XposedHelpers.setIntField(object, fieldName, value);
+            Field field = findField(object.getClass(), fieldName);
+            int current = field.getInt(object);
+            if (current == value) {
+                return false;
+            }
+            field.setInt(object, value);
             return true;
         } catch (Throwable t) {
-            XposedBridge.log(TAG + ": could not set " + fieldName);
-            XposedBridge.log(t);
+            log(Log.WARN, TAG, "could not set " + fieldName, t);
             return false;
         }
     }
 
-    private static long safeGetLongField(Object object, String fieldName, long fallback) {
+    private long safeGetLongField(Object object, String fieldName, long fallback) {
         try {
-            return XposedHelpers.getLongField(object, fieldName);
+            return findField(object.getClass(), fieldName).getLong(object);
         } catch (Throwable ignored) {
             return fallback;
         }
     }
 
-    private static boolean safeGetBooleanField(Object object, String fieldName, boolean fallback) {
+    private boolean safeGetBooleanField(Object object, String fieldName, boolean fallback) {
         try {
-            return XposedHelpers.getBooleanField(object, fieldName);
+            return findField(object.getClass(), fieldName).getBoolean(object);
         } catch (Throwable ignored) {
             return fallback;
         }
     }
 
-    private static void maybeShowActivationToast(XC_MethodHook.MethodHookParam param) {
-        try {
-            long fileSize = safeGetLongField(param.thisObject, "totalBytesCount", 0L);
-            long now = System.currentTimeMillis();
+    private static Field findField(Class<?> type, String fieldName) throws NoSuchFieldException {
+        Class<?> current = type;
+        while (current != null) {
+            try {
+                Field field = current.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                return field;
+            } catch (NoSuchFieldException ignored) {
+                current = current.getSuperclass();
+            }
+        }
+        throw new NoSuchFieldException(type.getName() + "." + fieldName);
+    }
 
-            if (fileSize <= BIG_FILE_SIZE_FROM || now - speedUpShownAtMs <= TOAST_THROTTLE_MS) {
+    private void maybeShowActivationToast(Object operation) {
+        long fileSize = safeGetLongField(operation, "totalBytesCount", 0L);
+        long now = System.currentTimeMillis();
+
+        synchronized (MainHook.class) {
+            if (fileSize <= BIG_FILE_SIZE_FROM
+                    || now - speedUpShownAtMs <= TOAST_THROTTLE_MS) {
                 return;
             }
-
             speedUpShownAtMs = now;
+        }
 
-            new Handler(Looper.getMainLooper()).post(() -> {
-                try {
-                    Toast.makeText(
-                            AndroidAppHelper.currentApplication(),
-                            "Speed Boost Activated\nNullgram/Telegram speed params applied",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                } catch (Throwable t) {
-                    XposedBridge.log(TAG + ": failed to show activation toast");
-                    XposedBridge.log(t);
+        new Handler(Looper.getMainLooper()).post(() -> {
+            try {
+                Context context = currentApplicationContext();
+                if (context == null) {
+                    log(Log.DEBUG, TAG, "activation toast skipped: no application context yet");
+                    return;
                 }
-            });
+                Toast.makeText(
+                        context,
+                        "Speed Boost Activated\nTelegram/Nullgram speed params applied",
+                        Toast.LENGTH_SHORT
+                ).show();
+            } catch (Throwable t) {
+                log(Log.WARN, TAG, "failed to show activation toast", t);
+            }
+        });
+    }
+
+    private Context currentApplicationContext() {
+        try {
+            // Avoid the legacy AndroidAppHelper dependency. ActivityThread is used only
+            // as an optional best-effort source for a Toast context; hook correctness
+            // never depends on it.
+            Class<?> activityThread = Class.forName("android.app.ActivityThread");
+            Method currentApplication = activityThread.getDeclaredMethod("currentApplication");
+            currentApplication.setAccessible(true);
+            Object application = currentApplication.invoke(null);
+            return application instanceof Context ? (Context) application : null;
         } catch (Throwable t) {
-            XposedBridge.log(TAG + ": failed while checking file size");
-            XposedBridge.log(t);
+            log(Log.DEBUG, TAG, "application context unavailable", t);
+            return null;
         }
     }
 }
