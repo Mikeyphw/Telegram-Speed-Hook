@@ -15,7 +15,8 @@ int drawable info 0x7f020008
 int drawable tele 0x7f020009
 int drawable telegram 0x7f02000a
 int layout main 0x7f030000
-int string app_name 0x7f040000
+int string app_description 0x7f040000
+int string app_name 0x7f040001
 int style AppTheme 0x7f050000
 int style FullScreen 0x7f050001
 int style NoActionBar 0x7f050002

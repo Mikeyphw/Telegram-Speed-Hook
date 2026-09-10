@@ -1,7 +1,13 @@
-#Tue Aug 11 12:07:10 BRT 2026
-base.0=/home/mike/Code/Telegram-Speed-Hook/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
-base.1=/home/mike/Code/Telegram-Speed-Hook/app/build/intermediates/dex/debug/mergeProjectDexDebug/9/classes.dex
-path.0=0/classes.dex
-path.1=9/classes.dex
+#Thu Sep 10 22:38:51 GMT 2026
+base.0=/data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/build/intermediates/dex/debug/mergeExtDexDebug/classes.dex
+base.1=/data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
+base.2=/data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/build/intermediates/dex/debug/mergeProjectDexDebug/9/classes.dex
+base.3=/data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/build/intermediates/global_synthetics_dex/debug/generateDebugGlobalSynthetics/classes.dex
+path.0=classes.dex
+path.1=0/classes.dex
+path.2=9/classes.dex
+path.3=classes.dex
 renamed.0=classes.dex
 renamed.1=classes2.dex
+renamed.2=classes3.dex
+renamed.3=classes4.dex

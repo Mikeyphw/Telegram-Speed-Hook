@@ -1,83 +1,61 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:1-35:12
-INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:1-35:12
-INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:1-35:12
-INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:1-35:12
+ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:1:1-21:12
+INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:1:1-21:12
+INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:1:1-21:12
+INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:1:1-21:12
 	package
-		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+		INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
 	android:versionName
-		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+		INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
 	android:versionCode
-		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+		INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
 	xmlns:android
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:3:2-60
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:1:11-69
 application
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:4:2-34:16
-INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:4:2-34:16
+ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:5-20:19
+INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:2:5-20:19
 	android:extractNativeLibs
-		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+		INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
 	android:label
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:7:3-35
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:6:9-41
 	android:icon
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:6:3-36
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:5:9-42
 	android:allowBackup
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:5:3-29
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:3:9-35
+	android:description
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:4:9-54
 	android:theme
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:8:3-34
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:7:9-40
 activity#Telegram.Speed.Hook.MainActivity
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:9:3-20:14
+ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:8:9-19:20
 	android:screenOrientation
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:14:4-40
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:13:13-49
 	android:hardwareAccelerated
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:12:4-38
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:12:13-47
 	android:exported
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:15:4-27
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:11:13-36
 	android:supportsPictureInPicture
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:13:4-43
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:14:13-52
 	android:configChanges
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:11:4-97
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:10:13-106
 	android:name
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:10:4-32
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:9:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:16:4-19:20
+ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:15:13-18:29
 action#android.intent.action.MAIN
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:17:5-57
+ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:16:17-69
 	android:name
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:17:13-54
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:16:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:18:5-65
+ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:17:17-77
 	android:name
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:18:15-62
-meta-data#xposedmodule
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:22:1-24:28
-	android:value
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:24:5-25
-	android:name
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:23:5-32
-meta-data#xposeddescription
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:25:1-27:67
-	android:value
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:27:5-64
-	android:name
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:26:5-37
-meta-data#xposedminversion
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:28:1-30:26
-	android:value
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:30:5-23
-	android:name
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:29:5-36
-meta-data#xposedscope
-ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:31:1-33:67
-	android:value
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:33:5-64
-	android:name
-		ADDED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:32:5-31
+		ADDED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml:17:27-74
 uses-sdk
-INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
-INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
 	android:targetSdkVersion
-		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+		INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from /home/mike/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
+		INJECTED from /data/data/com.termux/files/home/Code/Telegram-Speed-Hook/app/src/main/AndroidManifest.xml
