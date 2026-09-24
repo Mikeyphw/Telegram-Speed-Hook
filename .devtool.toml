@@ -94,3 +94,130 @@ build = "./gradle-termux :app:assembleDebug"
 check = "python3 scripts/verify-modern-xposed.py && python3 scripts/verify-toolchain.py && ./gradle-termux :app:assembleDebug && python3 scripts/verify-modern-xposed.py app/build/outputs/apk/debug/app-debug.apk"
 install = "adb install -r app/build/outputs/apk/debug/app-debug.apk"
 logs = "adb logcat -v time | grep TgSpeedHook"
+# -----------------------------------------------------------------------------
+# Devtool canonical target convergence (OV02)
+# -----------------------------------------------------------------------------
+[workspace]
+default_target = "telegram_speed_hook"
+
+[execution]
+environment = "auto"
+chroot_name = "androidos"
+device_serial = ""
+
+[targets.telegram_speed_hook]
+runner = "android"
+platform = "android"
+root = "."
+execution_environment = "native-termux"
+chroot_name = "androidos"
+inputs = [
+  ".devtool.toml",
+  "build.gradle",
+  "settings.gradle",
+  "gradle.properties",
+  "gradle/wrapper/gradle-wrapper.properties",
+  "gradlew",
+  "gradle-termux",
+  "app/**",
+  "scripts/verify-modern-xposed.py",
+  "scripts/verify-toolchain.py",
+]
+outputs = [
+  "app/build/outputs/apk/debug/app-debug.apk",
+]
+
+[targets.telegram_speed_hook.android]
+variant = "debug"
+aapt2_provider = "auto"
+instrumentation = "when-device-present"
+prefer_native_termux = true
+
+[targets.telegram_speed_hook.gradle]
+version = "9.7.1"
+provider = "wrapper"
+max_workers = 1
+structured_events = true
+no_daemon = true
+parallel = false
+build_cache = true
+fail_fast = false
+offline = false
+args = [
+  "-Dorg.gradle.parallel=false",
+  "-Dorg.gradle.vfs.watch=false",
+  "-Pkotlin.incremental=true",
+  "-Pkotlin.compiler.execution.strategy=in-process",
+]
+
+[targets.telegram_speed_hook.tasks]
+restore = ["help"]
+build = [":app:assembleDebug"]
+test = [":app:testDebugUnitTest"]
+lint = [":app:lintDebug"]
+clean = ["clean"]
+
+[targets.telegram_speed_hook.artifacts]
+required = false
+verify = false
+paths = ["app/build/outputs/apk/debug/app-debug.apk"]
+
+[jobs.telegram-speed-hook-source-xposed]
+runner = "python"
+root = "."
+execution_environment = "native-termux"
+command = ["python3", "scripts/verify-modern-xposed.py"]
+inputs = [
+  "app/build.gradle",
+  "app/src/main/AndroidManifest.xml",
+  "app/src/main/java/Telegram/Speed/Hook/MainHook.java",
+  "app/proguard-rules.pro",
+  "app/src/main/resources/META-INF/xposed/**",
+  "scripts/verify-modern-xposed.py",
+]
+
+[jobs.telegram-speed-hook-toolchain]
+runner = "python"
+root = "."
+execution_environment = "native-termux"
+command = ["python3", "scripts/verify-toolchain.py"]
+inputs = [
+  "build.gradle",
+  "app/build.gradle",
+  "gradle/wrapper/gradle-wrapper.properties",
+  "scripts/verify-toolchain.py",
+]
+
+[jobs.telegram-speed-hook-packaged-xposed]
+runner = "python"
+root = "."
+execution_environment = "native-termux"
+command = ["python3", "scripts/verify-modern-xposed.py", "app/build/outputs/apk/debug/app-debug.apk"]
+inputs = [
+  "app/build/outputs/apk/debug/app-debug.apk",
+  "app/src/main/resources/META-INF/xposed/**",
+  "scripts/verify-modern-xposed.py",
+]
+outputs = ["app/build/outputs/apk/debug/app-debug.apk"]
+
+[targets.telegram_speed_hook.workflows]
+restore = ["runner:android#restore"]
+build = [
+  "job:telegram-speed-hook-source-xposed",
+  "job:telegram-speed-hook-toolchain",
+  "runner:android#build",
+]
+test = ["runner:android#test"]
+lint = ["runner:android#lint"]
+package = [
+  "runner:android#build",
+  "job:telegram-speed-hook-packaged-xposed",
+]
+validate = [
+  "job:telegram-speed-hook-source-xposed",
+  "job:telegram-speed-hook-toolchain",
+  "runner:android#build",
+  "runner:android#test",
+  "runner:android#lint",
+  "job:telegram-speed-hook-packaged-xposed",
+]

@@ -1,0 +1,34 @@
+# Devtool local runtime state
+.devtool/
+
+# Android / Gradle
+.gradle/
+**/build/
+local.properties
+.kotlin/
+.cxx/
+.externalNativeBuild/
+*.apk
+*.ap_
+*.aab
+
+# Local signing / secrets
+*.jks
+*.keystore
+*.p12
+*.pfx
+keystore.properties
+signing.properties
+
+# IDE / editor
+.idea/
+.vscode/
+*.iml
+
+# Logs, temp files, backups
+*.log
+*.tmp
+*.bak
+*.before-*
+.DS_Store
+Thumbs.db
