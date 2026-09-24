@@ -160,7 +160,10 @@ clean = ["clean"]
 [targets.telegram_speed_hook.artifacts]
 required = false
 verify = false
-paths = ["app/build/outputs/apk/debug/app-debug.apk"]
+paths = [
+    "app/build/outputs/apk/debug/app-debug.apk",
+]
+recursive = true
 
 [jobs.telegram-speed-hook-source-xposed]
 runner = "python"
