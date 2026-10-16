@@ -13,7 +13,7 @@ min_sdk = 26
 target_sdk = 36
 debug_apk = "app/build/outputs/apk/debug/app-debug.apk"
 
-[xposed]
+[extensions.xposed]
 module_class = "Telegram.Speed.Hook.MainHook"
 api_dependency = "io.github.libxposed:api:102.0.0"
 min_api_version = 101
@@ -21,18 +21,18 @@ target_api_version = 102
 metadata_dir = "app/src/main/resources/META-INF/xposed"
 log_tag = "TgSpeedHook"
 
-[xposed.scope]
+[extensions.xposed.scope]
 telegram = "org.telegram.messenger"
 nullgram = "top.qwq2333.nullgram"
 
-[hook]
+[extensions.hook]
 target_class = "org.telegram.messenger.FileLoadOperation"
 target_method = "updateParams"
 big_file_threshold_bytes = 5242880
 download_chunk_size_big_bytes = 1048576
 max_download_requests_big = 12
 
-[checks.source]
+[extensions.checks.source]
 description = "Verify modern libxposed API 102 packaging, hook safety, and toolchain floors"
 command = """
 set -eu
@@ -53,7 +53,8 @@ command = "./gradle-termux :app:assembleDebug"
 description = "Verify source contract, build APK, then verify packaged module metadata"
 command = """
 set -eu
-devtool run checks.source
+python3 scripts/verify-modern-xposed.py
+python3 scripts/verify-toolchain.py
 ./gradle-termux :app:assembleDebug
 python3 scripts/verify-modern-xposed.py app/build/outputs/apk/debug/app-debug.apk
 """
@@ -77,7 +78,8 @@ command = "adb logcat -v time | grep TgSpeedHook"
 description = "Full local release sanity check"
 command = """
 set -eu
-devtool run checks.source
+python3 scripts/verify-modern-xposed.py
+python3 scripts/verify-toolchain.py
 ./gradle-termux clean :app:assembleDebug
 python3 scripts/verify-modern-xposed.py app/build/outputs/apk/debug/app-debug.apk
 ls -lh app/build/outputs/apk/debug/app-debug.apk
@@ -89,7 +91,7 @@ source_hook = "app/src/main/java/Telegram/Speed/Hook/MainHook.java"
 manifest = "app/src/main/AndroidManifest.xml"
 xposed_metadata = "app/src/main/resources/META-INF/xposed"
 
-[commands]
+[extensions.commands]
 build = "./gradle-termux :app:assembleDebug"
 check = "python3 scripts/verify-modern-xposed.py && python3 scripts/verify-toolchain.py && ./gradle-termux :app:assembleDebug && python3 scripts/verify-modern-xposed.py app/build/outputs/apk/debug/app-debug.apk"
 install = "adb install -r app/build/outputs/apk/debug/app-debug.apk"
@@ -224,3 +226,86 @@ validate = [
   "runner:android#lint",
   "job:telegram-speed-hook-packaged-xposed",
 ]
+ci-preflight = [
+  { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
+  { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+  { id = "xposed-source", ref = "job:telegram-speed-hook-source-xposed", depends_on = [] },
+]
+ci-local = [
+  { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
+  { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+  { id = "xposed-source", ref = "job:telegram-speed-hook-source-xposed", depends_on = [] },
+  { id = "toolchain", ref = "job:telegram-speed-hook-toolchain", depends_on = ["xposed-source", "source-contract"] },
+  { id = "unit", ref = "runner:android#test", depends_on = ["toolchain", "actions-contract"] },
+  { id = "lint", ref = "runner:android#lint", depends_on = ["toolchain", "actions-contract"] },
+]
+ci-source = [
+  { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
+  { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+]
+
+[targets.telegram_speed_hook.jobs.ci-actions-contract]
+runner = "command"
+command = ["python3", "scripts/devtool_actions_contract.py"]
+inputs = [".devtool.toml", ".github/workflows/*.yml", "scripts/devtool_actions_contract.py"]
+metadata = { read_only = true }
+
+[workspace.scheduler]
+parallel = true
+max_parallel_nodes = 2
+max_gradle_nodes = 1
+max_dotnet_nodes = 1
+
+[wrapper]
+schema = 2
+default_command = "build"
+
+[wrapper.commands.build]
+description = "build through canonical Devtool and EXO"
+devtool = "build"
+target = "telegram_speed_hook"
+allow_passthrough = true
+
+[wrapper.commands.test]
+description = "test through canonical Devtool and EXO"
+devtool = "test"
+target = "telegram_speed_hook"
+allow_passthrough = true
+
+[wrapper.commands.lint]
+description = "lint through canonical Devtool and EXO"
+devtool = "lint"
+target = "telegram_speed_hook"
+allow_passthrough = true
+
+[wrapper.commands.package]
+description = "package through canonical Devtool and EXO"
+devtool = "package"
+target = "telegram_speed_hook"
+allow_passthrough = true
+
+[wrapper.commands.validate]
+description = "validate through canonical Devtool and EXO"
+workflow = "validate"
+target = "telegram_speed_hook"
+
+[wrapper.commands.ci-preflight]
+description = "ci-preflight through canonical Devtool and EXO"
+workflow = "ci-preflight"
+target = "telegram_speed_hook"
+
+[wrapper.commands.ci-local]
+description = "ci-local through canonical Devtool and EXO"
+workflow = "ci-local"
+target = "telegram_speed_hook"
+
+[targets.telegram_speed_hook.jobs.ci-source-contract]
+runner = "command"
+command = ["python3", "scripts/verify_telegram_speed_hook_actions.py", "--static"]
+inputs = [".devtool.toml", "scripts/verify_telegram_speed_hook_actions.py", ".github/workflows/*.yml"]
+metadata = { read_only = true }
+
+[wrapper.commands.ci-source]
+description = "Read-only project-specific source and CI contract with EXO evidence"
+workflow = "ci-source"
+target = "telegram_speed_hook"
