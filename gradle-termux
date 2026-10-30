@@ -1,8 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/sh
-set -eu
-
-if [ -x "./gradlew" ]; then
-    exec ./gradlew --no-daemon "$@"
-fi
-
-exec gradle --no-daemon "$@"
+#!/bin/sh
+# Retained to fail closed on the old local Gradle entrypoint.
+echo "HOSTED_GRADLE_ONLY: local Gradle is disabled; use ./devtoolw remote-debug-plan, then ./devtoolw remote-debug-build --yes" >&2
+exit 2

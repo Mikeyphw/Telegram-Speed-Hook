@@ -42,22 +42,16 @@ echo "Modern libxposed source and toolchain checks passed."
 """
 
 [tasks.clean]
-description = "Clean Gradle outputs"
-command = "./gradle-termux clean"
+description = "Local Gradle clean disabled; use GitHub Actions for builds"
+command = "python3 scripts/hosted_gradle_only.py"
 
 [tasks.build_debug]
-description = "Build debug APK"
-command = "./gradle-termux :app:assembleDebug"
+description = "Local Gradle build disabled; dispatch remote build with ./devtoolw remote-debug-build --yes"
+command = "python3 scripts/hosted_gradle_only.py"
 
 [tasks.verify]
-description = "Verify source contract, build APK, then verify packaged module metadata"
-command = """
-set -eu
-python3 scripts/verify-modern-xposed.py
-python3 scripts/verify-toolchain.py
-./gradle-termux :app:assembleDebug
-python3 scripts/verify-modern-xposed.py app/build/outputs/apk/debug/app-debug.apk
-"""
+description = "Verify source contracts without Gradle; APK verification happens in GitHub Actions"
+command = "python3 scripts/verify-modern-xposed.py && python3 scripts/verify-toolchain.py"
 
 [tasks.install_debug]
 description = "Install debug APK on connected device"
@@ -75,15 +69,8 @@ description = "Tail hook logs"
 command = "adb logcat -v time | grep TgSpeedHook"
 
 [tasks.release_check]
-description = "Full local release sanity check"
-command = """
-set -eu
-python3 scripts/verify-modern-xposed.py
-python3 scripts/verify-toolchain.py
-./gradle-termux clean :app:assembleDebug
-python3 scripts/verify-modern-xposed.py app/build/outputs/apk/debug/app-debug.apk
-ls -lh app/build/outputs/apk/debug/app-debug.apk
-"""
+description = "Local Gradle release check disabled; no hosted release lane is configured"
+command = "python3 scripts/hosted_gradle_only.py"
 
 [artifacts]
 debug_apk = "app/build/outputs/apk/debug/app-debug.apk"
@@ -92,8 +79,8 @@ manifest = "app/src/main/AndroidManifest.xml"
 xposed_metadata = "app/src/main/resources/META-INF/xposed"
 
 [extensions.commands]
-build = "./gradle-termux :app:assembleDebug"
-check = "python3 scripts/verify-modern-xposed.py && python3 scripts/verify-toolchain.py && ./gradle-termux :app:assembleDebug && python3 scripts/verify-modern-xposed.py app/build/outputs/apk/debug/app-debug.apk"
+build = "python3 scripts/hosted_gradle_only.py"
+check = "python3 scripts/verify-modern-xposed.py && python3 scripts/verify-toolchain.py"
 install = "adb install -r app/build/outputs/apk/debug/app-debug.apk"
 logs = "adb logcat -v time | grep TgSpeedHook"
 # -----------------------------------------------------------------------------
@@ -111,7 +98,8 @@ device_serial = ""
 runner = "android"
 platform = "android"
 root = "."
-execution_environment = "native-termux"
+# Auto permits portable Python source checks; hosted Gradle stays GitHub-only.
+execution_environment = "auto"
 chroot_name = "androidos"
 inputs = [
   ".devtool.toml",
@@ -170,7 +158,7 @@ recursive = true
 [jobs.telegram-speed-hook-source-xposed]
 runner = "python"
 root = "."
-execution_environment = "native-termux"
+execution_environment = "auto"
 command = ["python3", "scripts/verify-modern-xposed.py"]
 inputs = [
   "app/build.gradle",
@@ -180,11 +168,12 @@ inputs = [
   "app/src/main/resources/META-INF/xposed/**",
   "scripts/verify-modern-xposed.py",
 ]
+metadata = { read_only = true }
 
 [jobs.telegram-speed-hook-toolchain]
 runner = "python"
 root = "."
-execution_environment = "native-termux"
+execution_environment = "auto"
 command = ["python3", "scripts/verify-toolchain.py"]
 inputs = [
   "build.gradle",
@@ -192,6 +181,7 @@ inputs = [
   "gradle/wrapper/gradle-wrapper.properties",
   "scripts/verify-toolchain.py",
 ]
+metadata = { read_only = true }
 
 [jobs.telegram-speed-hook-packaged-xposed]
 runner = "python"
@@ -229,19 +219,22 @@ validate = [
 ci-preflight = [
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+  { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
   { id = "xposed-source", ref = "job:telegram-speed-hook-source-xposed", depends_on = [] },
 ]
 ci-local = [
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+  { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
   { id = "xposed-source", ref = "job:telegram-speed-hook-source-xposed", depends_on = [] },
-  { id = "toolchain", ref = "job:telegram-speed-hook-toolchain", depends_on = ["xposed-source", "source-contract"] },
-  { id = "unit", ref = "runner:android#test", depends_on = ["toolchain", "actions-contract"] },
-  { id = "lint", ref = "runner:android#lint", depends_on = ["toolchain", "actions-contract"] },
+  { id = "toolchain", ref = "job:telegram-speed-hook-toolchain", depends_on = ["xposed-source"] },
 ]
 ci-source = [
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
+  { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
+  { id = "xposed-source", ref = "job:telegram-speed-hook-source-xposed", depends_on = [] },
+  { id = "toolchain", ref = "job:telegram-speed-hook-toolchain", depends_on = ["xposed-source"] },
 ]
 
 [targets.telegram_speed_hook.jobs.ci-actions-contract]
@@ -258,45 +251,26 @@ max_dotnet_nodes = 1
 
 [wrapper]
 schema = 2
-default_command = "build"
-
-[wrapper.commands.build]
-description = "build through canonical Devtool and EXO"
-devtool = "build"
-target = "telegram_speed_hook"
-allow_passthrough = true
-
-[wrapper.commands.test]
-description = "test through canonical Devtool and EXO"
-devtool = "test"
-target = "telegram_speed_hook"
-allow_passthrough = true
-
-[wrapper.commands.lint]
-description = "lint through canonical Devtool and EXO"
-devtool = "lint"
-target = "telegram_speed_hook"
-allow_passthrough = true
-
-[wrapper.commands.package]
-description = "package through canonical Devtool and EXO"
-devtool = "package"
-target = "telegram_speed_hook"
-allow_passthrough = true
-
-[wrapper.commands.validate]
-description = "validate through canonical Devtool and EXO"
-workflow = "validate"
-target = "telegram_speed_hook"
+default_command = "ci-source"
 
 [wrapper.commands.ci-preflight]
-description = "ci-preflight through canonical Devtool and EXO"
+description = "Portable read-only workflow/source contract checks"
 workflow = "ci-preflight"
 target = "telegram_speed_hook"
 
 [wrapper.commands.ci-local]
-description = "ci-local through canonical Devtool and EXO"
+description = "Portable Python-only source validation; never runs Gradle"
 workflow = "ci-local"
+target = "telegram_speed_hook"
+
+[wrapper.commands.ci-source]
+description = "Default local source and wrapper contract checks (no Gradle)"
+workflow = "ci-source"
+target = "telegram_speed_hook"
+
+[wrapper.commands.validate]
+description = "Alias for safe local ci-source (not the native Gradle validation runner)"
+workflow = "ci-source"
 target = "telegram_speed_hook"
 
 [targets.telegram_speed_hook.jobs.ci-source-contract]
@@ -305,7 +279,74 @@ command = ["python3", "scripts/verify_telegram_speed_hook_actions.py", "--static
 inputs = [".devtool.toml", "scripts/verify_telegram_speed_hook_actions.py", ".github/workflows/*.yml"]
 metadata = { read_only = true }
 
-[wrapper.commands.ci-source]
-description = "Read-only project-specific source and CI contract with EXO evidence"
-workflow = "ci-source"
-target = "telegram_speed_hook"
+[targets.telegram_speed_hook.jobs.ci-wrapper-contract]
+runner = "command"
+command = ["python3", "scripts/verify_devtool_wave_a.py"]
+inputs = [".devtool.toml", "scripts/verify_devtool_wave_a.py", "scripts/hosted_gradle_only.py", "gradle-termux", "docs/ci/DEVTOOL_ORCHESTRATION.md"]
+metadata = { read_only = true }
+
+# GitHub-only Gradle: typed Actions shortcuts, no raw shell or passthrough.
+# Default branch is fixed at the audited snapshot: main. For other refs,
+# use `devtool actions plan/run ... --ref YOUR_PUSHED_BRANCH` explicitly.
+[wrapper.commands.remote-debug-plan]
+description = "Read-only GitHub debug APK plan with fixed dispatch inputs"
+devtool = "actions"
+[wrapper.commands.remote-debug-plan.actions]
+operation = "plan"
+workflow_id = "devtool-android-build.yml"
+ref = "main"
+[wrapper.commands.remote-debug-plan.actions.inputs]
+project_dir = "."
+module = "app"
+variant = "debug"
+format = "apk"
+
+[wrapper.commands.remote-debug-build]
+description = "Explicit GitHub debug APK dispatch; requires --yes"
+devtool = "actions"
+[wrapper.commands.remote-debug-build.actions]
+operation = "dispatch"
+workflow_id = "devtool-android-build.yml"
+ref = "main"
+[wrapper.commands.remote-debug-build.actions.inputs]
+project_dir = "."
+module = "app"
+variant = "debug"
+format = "apk"
+[wrapper.commands.remote-debug-build.options.yes]
+type = "boolean"
+description = "Explicitly authorize GitHub workflow dispatch"
+command_argv = ["--yes"]
+
+[wrapper.commands.remote-watch]
+description = "Watch the exact request; does not dispatch a new build"
+devtool = "actions"
+[wrapper.commands.remote-watch.actions]
+operation = "watch"
+[wrapper.commands.remote-watch.options.request_id]
+type = "string"
+required = true
+aliases = ["request-id"]
+command_argv = ["--request-id", "{value}"]
+
+[wrapper.commands.remote-resume]
+description = "Resume an existing dispatch request without a new POST"
+devtool = "actions"
+[wrapper.commands.remote-resume.actions]
+operation = "resume"
+[wrapper.commands.remote-resume.options.request_id]
+type = "string"
+required = true
+aliases = ["request-id"]
+command_argv = ["--request-id", "{value}"]
+
+[wrapper.commands.remote-artifacts]
+description = "List artifacts from the exact recorded dispatch request"
+devtool = "actions"
+[wrapper.commands.remote-artifacts.actions]
+operation = "artifacts"
+[wrapper.commands.remote-artifacts.options.request_id]
+type = "string"
+required = true
+aliases = ["request-id"]
+command_argv = ["--request-id", "{value}"]

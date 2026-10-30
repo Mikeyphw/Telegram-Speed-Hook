@@ -32,7 +32,7 @@ commit or push performed automatically. The overlay also changes `.devtool.toml`
 legacy top-level `xposed`, `hook`, `checks`, and `commands` tables are moved to
 `[extensions.*]`, and the two local tasks referencing the unsupported
 `devtool run checks.source` are updated to invoke the existing Python verifiers
-directly. Hook behavior, target definitions and local build steps are unchanged.
+directly. Hook behavior and Android target metadata remain; legacy local Gradle build entrypoints are deliberately disabled by Wave A.
 
 ```sh
 cd ~/Code/Telegram-Speed-Hook

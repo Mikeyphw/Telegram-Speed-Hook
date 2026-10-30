@@ -40,18 +40,18 @@ Requirements:
 - Android Build Tools 36.0.0+
 - NDK 29+ (current pin: 29.0.14206865)
 
-Run:
+Run source validation locally and dispatch the Android build to GitHub Actions:
 
 ```sh
-python3 scripts/verify-toolchain.py
-python3 scripts/verify-modern-xposed.py
-./gradle-termux :app:assembleDebug
-python3 scripts/verify-modern-xposed.py app/build/outputs/apk/debug/app-debug.apk
+./devtoolw                    # default: Python-only source + wrapper checks
+./devtoolw remote-debug-plan # inspect hosted build request
+./devtoolw remote-debug-build --yes  # after committing/pushing main
 ```
 
-The final command checks the **actual APK ZIP** and fails if any modern
-`META-INF/xposed` member is missing or a legacy `assets/xposed_init` member has
-returned.
+The hosted workflow verifies the **actual APK ZIP** and fails if any modern
+`META-INF/xposed` member is missing or a legacy `assets/xposed_init` member
+has returned. Read `docs/ci/DEVTOOL_ORCHESTRATION.md` for exact-request
+resume, artifact inspection and qualifications; no Gradle is run locally.
 
 ## Install and test
 
