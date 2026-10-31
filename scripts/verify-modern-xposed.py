@@ -44,6 +44,7 @@ def parse_properties(text: str) -> dict[str, str]:
 build_gradle = read(ROOT / "app" / "build.gradle")
 manifest = read(ROOT / "app" / "src" / "main" / "AndroidManifest.xml")
 hook = read(ROOT / "app" / "src" / "main" / "java" / "Telegram" / "Speed" / "Hook" / "MainHook.java")
+policy = read(ROOT / "app" / "src" / "main" / "java" / "Telegram" / "Speed" / "Hook" / "SpeedPolicy.java")
 proguard = read(ROOT / "app" / "proguard-rules.pro")
 java_init = read(META_ROOT / "java_init.list")
 scope_list = read(META_ROOT / "scope.list")
@@ -60,11 +61,12 @@ require("onPackageReady(" in hook, "MainHook is missing onPackageReady lifecycle
 require("hook(updateParams)" in hook, "MainHook is not using the modern hook builder")
 require(".intercept(" in hook, "MainHook is not using the modern interceptor chain")
 require("chain.proceed()" in hook, "MainHook must preserve after-hook semantics through chain.proceed()")
+require("SpeedPolicy.apply(operation)" in hook, "MainHook must call production SpeedPolicy")
 require("de.robv.android.xposed" not in hook, "legacy Xposed classes remain in MainHook")
 require("import de.robv.android.xposed" not in hook, "legacy Xposed imports remain in MainHook")
 require('"maxDownloadRequests"' not in hook, "normal maxDownloadRequests must not be overridden")
 for token in ["BIG_FILE_SIZE_FROM", "downloadChunkSizeBig", "maxDownloadRequestsBig", "forceSmallChunk", "isPreloadVideoOperation", "isStream"]:
-    require(token in hook, f"hook safety/behavior token missing: {token}")
+    require(token in (hook + policy), f"hook safety/behavior token missing: {token}")
 
 for legacy in ["xposedmodule", "xposeddescription", "xposedminversion", "xposedscope"]:
     require(legacy not in manifest, f"legacy manifest metadata remains: {legacy}")

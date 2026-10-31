@@ -47,4 +47,7 @@ dependencies {
     // these classes inside the hooked target process and they must not be
     // packaged into the module APK.
     compileOnly 'io.github.libxposed:api:102.0.0'
+
+    // Real hosted JVM tests exercise the production SpeedPolicy class.
+    testImplementation 'junit:junit:4.13.2'
 }

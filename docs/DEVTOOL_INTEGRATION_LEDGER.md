@@ -41,3 +41,11 @@ Actual GitHub dispatch, Termux and physical device testing were not performed.
 - **Xposed packaging verification retained.** No credential-bearing release lane.
 - **Acceptance:** static schema and mutation tests, local Devtool source DAG, transactional overlay apply in disposable checkout; GitHub execution and emulator/device runtime remain **pending**.
 - **Open:** verify actual GitHub artifacts/run identity, independently attest remote artifacts before registry import, core Devtool hosted-only Gradle enforcement, and live device/emulator qualification.
+
+
+## Wave E — Telegram real hosted JVM tests (2026-10-31)
+
+- **Root cause:** `:app:testDebugUnitTest` could succeed without any checked-in policy test; static contracts alone did not prove hook parameter behavior.
+- **Fix:** extract pure Java `SpeedPolicy` from the production hook, add ten JUnit4 cases, wire Gradle `testImplementation`, enforce actual JUnit XML execution in the shared GitHub action, add host-only source/DAG contract and negative XML tests.
+- **Boundaries:** no local Gradle or chroot; no release signing, no automatic GitHub dispatch. Changes to Telegram/Nullgram runtime remain observational until device acceptance.
+- **Open:** run hosted CI against the new exact commit, verify ten JVM cases and receipt; validate installed APK and real downloads in target apps.

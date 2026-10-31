@@ -93,58 +93,18 @@ public final class MainHook extends XposedModule {
 
     private boolean applySpeedParams(Object operation) {
         try {
-            if (shouldSkipOperation(operation)) {
-                return false;
-            }
-
-            int maxCdnParts = Math.max(
-                    1,
-                    (int) (DEFAULT_MAX_FILE_SIZE / DOWNLOAD_CHUNK_SIZE_BIG)
-            );
-
-            boolean changed = false;
-            changed |= safeSetIntField(operation, "bigFileSizeFrom", BIG_FILE_SIZE_FROM);
-            changed |= safeSetIntField(operation, "downloadChunkSizeBig", DOWNLOAD_CHUNK_SIZE_BIG);
-            changed |= safeSetIntField(operation, "maxDownloadRequestsBig", MAX_DOWNLOAD_REQUESTS_BIG);
-            changed |= safeSetIntField(operation, "maxCdnParts", maxCdnParts);
-
+            boolean changed = SpeedPolicy.apply(operation);
             if (changed) {
                 log(Log.INFO, TAG,
                         "speed params applied"
                                 + " size=" + safeGetLongField(operation, "totalBytesCount", 0L)
-                                + " chunkBig=" + DOWNLOAD_CHUNK_SIZE_BIG
-                                + " requestsBig=" + MAX_DOWNLOAD_REQUESTS_BIG
-                                + " maxCdnParts=" + maxCdnParts);
+                                + " chunkBig=" + SpeedPolicy.DOWNLOAD_CHUNK_SIZE_BIG
+                                + " requestsBig=" + SpeedPolicy.MAX_DOWNLOAD_REQUESTS_BIG
+                                + " maxCdnParts=" + SpeedPolicy.MAX_CDN_PARTS);
             }
             return changed;
         } catch (Throwable t) {
             log(Log.ERROR, TAG, "failed to apply speed params", t);
-            return false;
-        }
-    }
-
-    private boolean shouldSkipOperation(Object operation) {
-        long size = safeGetLongField(operation, "totalBytesCount", 0L);
-        if (size > 0 && size < BIG_FILE_SIZE_FROM) {
-            return true;
-        }
-
-        return safeGetBooleanField(operation, "forceSmallChunk", false)
-                || safeGetBooleanField(operation, "isPreloadVideoOperation", false)
-                || safeGetBooleanField(operation, "isStream", false);
-    }
-
-    private boolean safeSetIntField(Object object, String fieldName, int value) {
-        try {
-            Field field = findField(object.getClass(), fieldName);
-            int current = field.getInt(object);
-            if (current == value) {
-                return false;
-            }
-            field.setInt(object, value);
-            return true;
-        } catch (Throwable t) {
-            log(Log.WARN, TAG, "could not set " + fieldName, t);
             return false;
         }
     }

@@ -232,6 +232,7 @@ ci-preflight = [
   { id = "xposed-source", ref = "job:telegram-speed-hook-source-xposed", depends_on = [] },
 ]
 ci-local = [
+  { id = "wave-e-policy-tests", ref = "job:ci-wave-e-policy-tests", depends_on = [] },
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
   { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
@@ -242,6 +243,7 @@ ci-local = [
   { id = "toolchain", ref = "job:telegram-speed-hook-toolchain", depends_on = [] },
 ]
 ci-source = [
+  { id = "wave-e-policy-tests", ref = "job:ci-wave-e-policy-tests", depends_on = [] },
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
   { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
@@ -391,4 +393,12 @@ runner = "command"
 execution_environment = "host"
 command = ["python3", "scripts/verify_devtool_wave_d.py"]
 inputs = [".devtool.toml", "scripts/verify_devtool_wave_d.py", "docs/ci/WAVE_D_HOSTED_POLICY.md"]
+metadata = { read_only = true }
+
+# Wave E — source-only checks of production JVM tests and hosted JUnit receipt.
+[targets.telegram_speed_hook.jobs.ci-wave-e-policy-tests]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "scripts/test_wave_e.py"]
+inputs = ["app/src/main/java/Telegram/Speed/Hook/**", "app/src/test/**", "app/build.gradle", "scripts/test_wave_e.py", "scripts/verify_junit_results.py", ".github/actions/**"]
 metadata = { read_only = true }

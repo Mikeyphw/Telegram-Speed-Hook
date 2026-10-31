@@ -39,6 +39,12 @@ runs:
         set -euo pipefail
         chmod +x ./gradlew
         ./gradlew --no-daemon --max-workers=2 :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+    - name: Reject empty or skipped JVM test suites
+      id: unit-test-receipt
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/verify_junit_results.py app/build/test-results/testDebugUnitTest
     - name: Verify APK and generate source-bound build evidence
       id: package
       shell: bash
