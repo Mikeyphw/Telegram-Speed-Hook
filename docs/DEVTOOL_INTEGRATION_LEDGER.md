@@ -25,3 +25,19 @@ qualification requires independent remote evidence and optional device checks.
 `wrapper verify`, `wrapper seal`, source DAG `plan/preflight/invoke`, and
 source-bound overlay `apply-overlay` passed in disposable checkouts.
 Actual GitHub dispatch, Termux and physical device testing were not performed.
+
+
+### Wave B (2026-10-30): ownership, source DAG and host routing
+
+- **Status:** OVERLAY IMPLEMENTED, device-side acceptance pending.
+- **Evidence:** source-only EXO workflows reference `job:` nodes with host execution and explicit read-only input ownership; Gradle remains cloud-only by wrapper.
+- **Consumer changes:** conservative target-level ownership for app, Python scripts, CI YAML and documentation; `scripts/verify_devtool_wave_b.py` provides fail-closed policy regression.
+- **Open:** affected-target selection is conservative and does not prune individual job nodes; hosted Android test/receipt acceptance belongs to Wave C.
+- **Correction:** Wave A Telegram `auto` affinity could also enter chroot; Wave B pins source checks to host.
+
+## 2026-10-30 — Wave C: hosted CI deduplication and artifact evidence
+
+- **Delivered locally:** shared hosted-only composite action; manual and automatic CI share source/Gradle/test/lint/APK verification; upgraded schema-2 run-bound receipts; offline downloaded-ZIP identity/hash checks; source-only Devtool `ci-wave-c-contract` job with mutation tests. See `docs/ci/WAVE_C_HOSTED_CI_AND_PROVENANCE.md`.
+- **Xposed packaging verification retained.** No credential-bearing release lane.
+- **Acceptance:** static schema and mutation tests, local Devtool source DAG, transactional overlay apply in disposable checkout; GitHub execution and emulator/device runtime remain **pending**.
+- **Open:** verify actual GitHub artifacts/run identity, independently attest remote artifacts before registry import, core Devtool hosted-only Gradle enforcement, and live device/emulator qualification.

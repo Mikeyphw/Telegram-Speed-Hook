@@ -68,3 +68,13 @@ Legacy `[tasks.build_debug]`, `[tasks.clean]`, `[tasks.release_check]`,
 `[extensions.commands].build`, and `gradle-termux` now refuse local Gradle.
 `[tasks.verify]` and `[extensions.commands].check` run Python-only checks.
 The APK packaging verifier remains part of GitHub Actions, not local source checks.
+
+
+## Wave B: source-only DAG and affected ownership
+
+`./devtoolw ci-source` remains the default and only calls Python source-check jobs.
+The target now explicitly owns workflow YAML, source directories, validation
+scripts and documentation. `devtool affected --explain` may be used to inspect
+conservative target selection; it is not a substitute for CI artifact evidence.
+All source jobs run on `host`, including Termux; Android Gradle dispatch stays
+exclusively within GitHub Actions.

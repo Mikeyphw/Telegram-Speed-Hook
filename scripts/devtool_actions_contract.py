@@ -2,7 +2,7 @@
 """Read-only EXO-bound GitHub workflow presence contract. Not a remote acceptance gate."""
 from pathlib import Path
 import sys
-FILES = ['.github/workflows/devtool-android-build.yml', '.github/workflows/telegram-speed-hook-ci.yml']
+FILES = ['.github/workflows/devtool-android-build.yml', '.github/workflows/telegram-speed-hook-ci.yml', '.github/actions/verified-debug-build/action.yml']
 root = Path(__file__).resolve().parents[1]
 for name in FILES:
     p = root / name

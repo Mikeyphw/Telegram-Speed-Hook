@@ -1,4 +1,4 @@
-# Automatic source gates and APK tests. Never signs/releases or installs on devices.
+# Every push/PR runs source contracts and hosted Android build. No release credentials.
 name: Telegram Speed Hook CI
 on:
   push:
@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   source:
-    name: Source, libxposed and toolchain contracts
+    name: Read-only source contracts
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.lane == 'all' || inputs.lane == 'source' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 8
@@ -26,18 +26,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Verify checked out commit and source constraints
+      - name: Validate checked-out source
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test -f gradle/wrapper/gradle-wrapper.properties
-          test -f gradle/wrapper/gradle-wrapper.jar
           python3 scripts/verify_telegram_speed_hook_actions.py --static
           python3 scripts/verify-toolchain.py
           python3 scripts/verify-modern-xposed.py
   android:
-    name: Assemble, unit tests, lint and packaged libxposed verification
+    name: Hosted Gradle, unit tests, lint, verified APK and receipt
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.lane == 'all' || inputs.lane == 'android' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 65
@@ -45,51 +43,5 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Source provenance and contracts
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test -f gradle/wrapper/gradle-wrapper.properties
-          test -f gradle/wrapper/gradle-wrapper.jar
-          python3 scripts/verify_telegram_speed_hook_actions.py --static
-          python3 scripts/verify-toolchain.py
-          python3 scripts/verify-modern-xposed.py
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - uses: android-actions/setup-android@v4
-      - name: Install pinned Android SDK and NDK
-        shell: bash
-        run: |
-          set -euo pipefail
-          sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0' 'ndk;29.0.14206865'
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Build, run unit tests and Android lint
-        shell: bash
-        run: |
-          set -euo pipefail
-          chmod +x ./gradlew
-          ./gradlew --no-daemon --max-workers=2 :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
-      - name: Independently verify produced APK
-        shell: bash
-        run: |
-          set -euo pipefail
-          apk=app/build/outputs/apk/debug/app-debug.apk
-          test -f "$apk" && test ! -L "$apk" && test -s "$apk"
-          python3 scripts/verify-modern-xposed.py "$apk"
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$apk"
-          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$apk" | grep -F "package: name='Telegram.Speed.Hook'"
-      - name: Upload CI test/lint reports on failure
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: telegram-speed-hook-ci-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            app/build/reports/tests/
-            app/build/test-results/
-            app/build/reports/lint-results-debug.html
-            app/build/reports/lint-results-debug.xml
-          if-no-files-found: ignore
-          retention-days: 7
+      - name: Shared hosted source/test/lint/package/receipt lane
+        uses: ./.github/actions/verified-debug-build

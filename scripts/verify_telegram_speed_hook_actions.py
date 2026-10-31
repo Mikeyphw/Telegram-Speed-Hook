@@ -65,57 +65,8 @@ def validate_static() -> None:
     require((ROOT / 'scripts/verify-toolchain.py').is_file(),
             'original toolchain verifier missing')
 
-    manual = source('.github/workflows/devtool-android-build.yml')
-    ci = source('.github/workflows/telegram-speed-hook-ci.yml')
-    for path, body in (('manual', manual), ('CI', ci)):
-        require(re.search(r'(?m)^permissions:\s*\n\s+contents: read\s*$', body) is not None,
-                f"{path}: least-privilege permissions missing")
-        for unsafe in ('secrets.', 'pull_request_target:', 'permissions: write-all',
-                       'assembleRelease', 'bundleRelease', 'DEVTOOL_RELEASE_KEYSTORE_B64'):
-            require(unsafe not in body, f'{path}: unsafe token {unsafe!r}')
-        for needle in ('actions/checkout@v4', 'actions/setup-java@v4',
-                       'android-actions/setup-android@v4', 'gradle/actions/setup-gradle@v4',
-                       'sdkmanager --install', 'gradle-wrapper',
-                       'python3 scripts/verify-modern-xposed.py',
-                       'python3 scripts/verify-toolchain.py',
-                       'python3 scripts/verify_telegram_speed_hook_actions.py --static',
-                       ':app:assembleDebug', 'apksigner', 'aapt',
-                       'Telegram.Speed.Hook', '29.0.14206865'):
-            # Check runtime controls; wrapper check is represented by gradle/wrapper/... in YAML.
-            search = 'gradle/wrapper/' if needle == 'gradle-wrapper' else needle
-            require(search in body, f'{path}: required control missing: {needle}')
-    for needle in ('workflow_dispatch:', 'project_dir:', 'module:', 'variant:', 'format:',
-                   'options: [app]', 'options: [debug]', 'options: [apk]',
-                   'test "$(git rev-parse HEAD)" = "$GITHUB_SHA"',
-                   'test "$DT_MODULE" = app', 'test "$DT_VARIANT" = debug',
-                   'test "$DT_FORMAT" = apk',
-                   '--evidence', 'if-no-files-found: error', 'actions/upload-artifact@v4'):
-        require(needle in manual, f'manual workflow missing: {needle}')
-    for needle in ('push:', 'pull_request:', 'workflow_dispatch:', 'options: [all, source, android]',
-                   ':app:testDebugUnitTest', ':app:lintDebug', 'app/build/test-results/'):
-        require(needle in ci, f'CI workflow missing: {needle}')
-
-    # PyYAML is optional here, but if installed, verify schema rather than only tokens.
-    try:
-        import yaml
-    except ImportError:
-        pass
-    else:
-        for name, body in (('manual', manual), ('CI', ci)):
-            parsed = yaml.safe_load(body)
-            require(isinstance(parsed, dict) and isinstance(parsed.get('jobs'), dict),
-                    f'{name}: invalid YAML jobs')
-            triggers = parsed.get('on', parsed.get(True))  # PyYAML YAML 1.1 treats 'on' as boolean.
-            require(isinstance(triggers, dict) and 'workflow_dispatch' in triggers,
-                    f'{name}: invalid workflow_dispatch definition')
-            if name == 'manual':
-                fields = triggers['workflow_dispatch']['inputs']
-                require(set(fields) == {'project_dir', 'module', 'variant', 'format'},
-                        'manual dispatch input contract changed')
-                for key, expected in (('project_dir', ['.']), ('module', ['app']),
-                                      ('variant', ['debug']), ('format', ['apk'])):
-                    require(fields[key]['options'] == expected,
-                            f'manual dispatch {key} choices changed')
+    from verify_wave_c import check as validate_wave_c
+    validate_wave_c(ROOT)
     print('Telegram Speed Hook Actions source and workflow contract: PASS (offline)')
 
 
@@ -132,26 +83,54 @@ def write_evidence(apk: Path, dest: Path) -> None:
     require(run_id.isdecimal() and attempt.isdecimal(), 'missing run identity')
     require(os.environ.get('GITHUB_REPOSITORY', '') == 'Mikeyphw/Telegram-Speed-Hook',
             'unexpected repository identity')
-    require(os.environ.get('GITHUB_EVENT_NAME', '') == 'workflow_dispatch',
-            'build evidence requires manual dispatch')
+    event = os.environ.get('GITHUB_EVENT_NAME', '')
+    require(event in ('workflow_dispatch','push','pull_request'),
+            'evidence only allowed in supported GitHub workflow events')
+    require(int(run_id) > 0 and int(attempt) > 0, 'invalid run numbers')
+    require(os.environ.get('GITHUB_WORKFLOW', ''), 'missing GitHub workflow identity')
+    import subprocess
+    checked = subprocess.run(['git','-C',str(ROOT),'rev-parse','HEAD'],
+                             capture_output=True,text=True,check=True,timeout=20).stdout.strip()
+    require(checked == sha, 'checked-out source does not match GitHub SHA')
+    sdk = Path(os.environ.get('ANDROID_HOME', '/nonexistent')) / 'build-tools/36.0.0'
+    signature = subprocess.run([str(sdk/'apksigner'),'verify','--print-certs',str(apk)],
+                              capture_output=True,text=True,check=True,timeout=30).stdout
+    certs = re.findall(r'(?im)^Signer #1 certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$',signature)
+    require(len(certs)==1, 'APK certificate fingerprint missing or ambiguous')
+    badging = subprocess.run([str(sdk/'aapt'),'dump','badging',str(apk)],
+                             capture_output=True,text=True,check=True,timeout=30).stdout
+    require(re.search(r"(?m)^package: name='Telegram\.Speed\.Hook'\s",badging),
+            'APK manifest identity changed')
     evidence = {
-        'schema_version': 1,
+        'schema_version': 2,
         'producer': 'telegram-speed-hook-devtool-github-actions',
         'repository': 'Mikeyphw/Telegram-Speed-Hook',
         'source_sha': sha,
         'run_id': int(run_id),
         'run_attempt': int(attempt),
-        'event': 'workflow_dispatch',
+        'github_run_id': int(run_id),
+        'github_run_attempt': int(attempt),
+        'event': event,
+        'workflow_event': event,
+        'workflow_name': os.environ['GITHUB_WORKFLOW'],
+        'workflow_run_url': f"https://github.com/Mikeyphw/Telegram-Speed-Hook/actions/runs/{run_id}",
+        'signing_certificate_sha256': certs[0].lower(),
+        'apk_signature_verified': True,
+        'apk_manifest_verified': True,
+        'unit_tests_and_lint_passed': True,
+        'device_tests_executed': False,
         'module': 'app',
         'variant': 'debug',
         'format': 'apk',
         'package': 'Telegram.Speed.Hook',
         'artifact_member': APK_NAME,
         'apk_size_bytes': apk.stat().st_size,
-        'apk_sha256': hashlib.file_digest(apk.open('rb'), 'sha256').hexdigest(),
+        'apk_sha256': hashlib.sha256(apk.read_bytes()).hexdigest(),
         'original_packaging_verifier': 'PASS',
         'runner_apksigner': 'PASS',
         'qualified_release': False,
+        'release_qualified': False,
+        'signed_release': False,
         'device_qualified': False,
     }
     with dest.open('x', encoding='utf-8') as out:

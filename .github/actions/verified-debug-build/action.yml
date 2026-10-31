@@ -1,0 +1,76 @@
+name: Verified Telegram debug build
+description: Shared hosted Gradle/test/lint and package provenance; no local Gradle or release signing
+runs:
+  using: composite
+  steps:
+    - name: Validate checked-out source and workflow contracts
+      id: source-contract
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test -f gradle/wrapper/gradle-wrapper.jar
+        test -f gradle/wrapper/gradle-wrapper.properties
+        python3 scripts/verify_telegram_speed_hook_actions.py --static
+        python3 scripts/verify-toolchain.py
+        python3 scripts/verify-modern-xposed.py
+    - name: Configure pinned Java 21
+      id: setup-java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '21'
+    - name: Prepare Android SDK
+      id: setup-sdk
+      uses: android-actions/setup-android@v4
+    - name: Install pinned Android SDK and NDK
+      id: install-sdk
+      shell: bash
+      run: |
+        set -euo pipefail
+        sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0' 'ndk;29.0.14206865'
+    - name: Prepare Gradle cache
+      id: gradle-cache
+      uses: gradle/actions/setup-gradle@v4
+    - name: Assemble, unit-test, and lint via hosted GitHub Actions
+      id: gradle-build
+      shell: bash
+      run: |
+        set -euo pipefail
+        chmod +x ./gradlew
+        ./gradlew --no-daemon --max-workers=2 :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+    - name: Verify APK and generate source-bound build evidence
+      id: package
+      shell: bash
+      run: |
+        set -euo pipefail
+        apk=app/build/outputs/apk/debug/app-debug.apk
+        test -f "$apk" && test ! -L "$apk" && test -s "$apk"
+        python3 scripts/verify-modern-xposed.py "$apk"
+        "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$apk"
+        "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$apk" | grep -F "package: name='Telegram.Speed.Hook'"
+        stage="$RUNNER_TEMP/tg-speed-hook-verified"
+        mkdir -p "$stage"
+        cp -- "$apk" "$stage/telegram-speed-hook-debug.apk"
+        python3 scripts/verify_telegram_speed_hook_actions.py --evidence "$stage/telegram-speed-hook-debug.apk" "$stage/build-evidence.json"
+        sha256sum "$stage/telegram-speed-hook-debug.apk"
+    - name: Upload APK and build evidence
+      id: upload-apk
+      uses: actions/upload-artifact@v4
+      with:
+        name: telegram-speed-hook-debug-apk-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/tg-speed-hook-verified/
+        if-no-files-found: error
+        retention-days: 7
+    - name: Preserve unit-test and lint diagnostics
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: telegram-speed-hook-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+        path: |
+          app/build/reports/tests/
+          app/build/test-results/
+          app/build/reports/lint-results-debug.html
+          app/build/reports/lint-results-debug.xml
+        if-no-files-found: ignore
+        retention-days: 7

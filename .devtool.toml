@@ -90,17 +90,18 @@ logs = "adb logcat -v time | grep TgSpeedHook"
 default_target = "telegram_speed_hook"
 
 [execution]
-environment = "auto"
-chroot_name = "androidos"
+# Wave D: Devtool native Gradle execution is forbidden for this repository.
+gradle_execution = "github-actions-only"
+# All source-only workflows stay on the invoking host, including Termux.
+environment = "host"
 device_serial = ""
 
 [targets.telegram_speed_hook]
 runner = "android"
 platform = "android"
 root = "."
-# Auto permits portable Python source checks; hosted Gradle stays GitHub-only.
-execution_environment = "auto"
-chroot_name = "androidos"
+# Explicit host pin avoids Termux chrootctl auto-promotion.
+execution_environment = "host"
 inputs = [
   ".devtool.toml",
   "build.gradle",
@@ -112,6 +113,11 @@ inputs = [
   "app/**",
   "scripts/verify-modern-xposed.py",
   "scripts/verify-toolchain.py",
+  "scripts/**",
+  ".github/workflows/**",
+  "docs/ci/**",
+  "docs/WRAPPER.md",
+  "docs/DEVTOOL_INTEGRATION_LEDGER.md",
 ]
 outputs = [
   "app/build/outputs/apk/debug/app-debug.apk",
@@ -158,7 +164,7 @@ recursive = true
 [jobs.telegram-speed-hook-source-xposed]
 runner = "python"
 root = "."
-execution_environment = "auto"
+execution_environment = "host"
 command = ["python3", "scripts/verify-modern-xposed.py"]
 inputs = [
   "app/build.gradle",
@@ -173,7 +179,7 @@ metadata = { read_only = true }
 [jobs.telegram-speed-hook-toolchain]
 runner = "python"
 root = "."
-execution_environment = "auto"
+execution_environment = "host"
 command = ["python3", "scripts/verify-toolchain.py"]
 inputs = [
   "build.gradle",
@@ -186,14 +192,14 @@ metadata = { read_only = true }
 [jobs.telegram-speed-hook-packaged-xposed]
 runner = "python"
 root = "."
-execution_environment = "native-termux"
+execution_environment = "host"
 command = ["python3", "scripts/verify-modern-xposed.py", "app/build/outputs/apk/debug/app-debug.apk"]
 inputs = [
   "app/build/outputs/apk/debug/app-debug.apk",
   "app/src/main/resources/META-INF/xposed/**",
   "scripts/verify-modern-xposed.py",
 ]
-outputs = ["app/build/outputs/apk/debug/app-debug.apk"]
+metadata = { read_only = true }
 
 [targets.telegram_speed_hook.workflows]
 restore = ["runner:android#restore"]
@@ -220,27 +226,37 @@ ci-preflight = [
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
   { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
+  { id = "wave-b-contract", ref = "job:ci-wave-b-contract", depends_on = [] },
+  { id = "wave-c-contract", ref = "job:ci-wave-c-contract", depends_on = [] },
+  { id = "wave-d-policy", ref = "job:ci-wave-d-policy", depends_on = ["wave-c-contract"] },
   { id = "xposed-source", ref = "job:telegram-speed-hook-source-xposed", depends_on = [] },
 ]
 ci-local = [
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
   { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
+  { id = "wave-b-contract", ref = "job:ci-wave-b-contract", depends_on = [] },
+  { id = "wave-c-contract", ref = "job:ci-wave-c-contract", depends_on = [] },
+  { id = "wave-d-policy", ref = "job:ci-wave-d-policy", depends_on = ["wave-c-contract"] },
   { id = "xposed-source", ref = "job:telegram-speed-hook-source-xposed", depends_on = [] },
-  { id = "toolchain", ref = "job:telegram-speed-hook-toolchain", depends_on = ["xposed-source"] },
+  { id = "toolchain", ref = "job:telegram-speed-hook-toolchain", depends_on = [] },
 ]
 ci-source = [
   { id = "actions-contract", ref = "job:ci-actions-contract", depends_on = [] },
   { id = "source-contract", ref = "job:ci-source-contract", depends_on = ["actions-contract"] },
   { id = "wrapper-contract", ref = "job:ci-wrapper-contract", depends_on = ["source-contract"] },
+  { id = "wave-b-contract", ref = "job:ci-wave-b-contract", depends_on = [] },
+  { id = "wave-c-contract", ref = "job:ci-wave-c-contract", depends_on = [] },
+  { id = "wave-d-policy", ref = "job:ci-wave-d-policy", depends_on = ["wave-c-contract"] },
   { id = "xposed-source", ref = "job:telegram-speed-hook-source-xposed", depends_on = [] },
-  { id = "toolchain", ref = "job:telegram-speed-hook-toolchain", depends_on = ["xposed-source"] },
+  { id = "toolchain", ref = "job:telegram-speed-hook-toolchain", depends_on = [] },
 ]
 
 [targets.telegram_speed_hook.jobs.ci-actions-contract]
 runner = "command"
+execution_environment = "host"
 command = ["python3", "scripts/devtool_actions_contract.py"]
-inputs = [".devtool.toml", ".github/workflows/*.yml", "scripts/devtool_actions_contract.py"]
+inputs = [".devtool.toml", ".github/workflows/**", ".github/actions/**", "scripts/devtool_actions_contract.py"]
 metadata = { read_only = true }
 
 [workspace.scheduler]
@@ -275,14 +291,16 @@ target = "telegram_speed_hook"
 
 [targets.telegram_speed_hook.jobs.ci-source-contract]
 runner = "command"
+execution_environment = "host"
 command = ["python3", "scripts/verify_telegram_speed_hook_actions.py", "--static"]
-inputs = [".devtool.toml", "scripts/verify_telegram_speed_hook_actions.py", ".github/workflows/*.yml"]
+inputs = [".devtool.toml", "scripts/verify_telegram_speed_hook_actions.py", "scripts/verify_wave_c.py", ".github/actions/**", ".github/workflows/**", "app/**", "build.gradle", "settings.gradle", "gradle.properties"]
 metadata = { read_only = true }
 
 [targets.telegram_speed_hook.jobs.ci-wrapper-contract]
 runner = "command"
+execution_environment = "host"
 command = ["python3", "scripts/verify_devtool_wave_a.py"]
-inputs = [".devtool.toml", "scripts/verify_devtool_wave_a.py", "scripts/hosted_gradle_only.py", "gradle-termux", "docs/ci/DEVTOOL_ORCHESTRATION.md"]
+inputs = [".devtool.toml", "scripts/verify_devtool_wave_a.py", "scripts/hosted_gradle_only.py", "gradle-termux", "docs/**", "scripts/verify_devtool_wave_b.py"]
 metadata = { read_only = true }
 
 # GitHub-only Gradle: typed Actions shortcuts, no raw shell or passthrough.
@@ -350,3 +368,27 @@ type = "string"
 required = true
 aliases = ["request-id"]
 command_argv = ["--request-id", "{value}"]
+
+
+[targets.telegram_speed_hook.jobs.ci-wave-b-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "scripts/verify_devtool_wave_b.py"]
+inputs = [".devtool.toml", "scripts/verify_devtool_wave_b.py", "scripts/verify_devtool_wave_a.py", "docs/ci/**"]
+metadata = { read_only = true }
+
+# Wave C: a strictly host-only, read-only contract for hosted shared builds.
+[targets.telegram_speed_hook.jobs.ci-wave-c-contract]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "scripts/test_wave_c.py"]
+inputs = [".github/workflows/**", ".github/actions/**", "scripts/verify_wave_c.py", "scripts/test_wave_c.py", "scripts/verify_wave_c_artifact.py", "scripts/verify_telegram_speed_hook_actions.py"]
+metadata = { read_only = true }
+
+# Wave D: enforce hosted-only source policy through an additional host-only check.
+[targets.telegram_speed_hook.jobs.ci-wave-d-policy]
+runner = "command"
+execution_environment = "host"
+command = ["python3", "scripts/verify_devtool_wave_d.py"]
+inputs = [".devtool.toml", "scripts/verify_devtool_wave_d.py", "docs/ci/WAVE_D_HOSTED_POLICY.md"]
+metadata = { read_only = true }
